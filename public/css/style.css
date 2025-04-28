@@ -98,3 +98,15 @@ a:hover{
     background-color: #fe424d !important;
     border:none !important;
 }
+
+/* show page */
+.show-image{
+    height:30vh;
+}
+.btns{
+    display: flex;
+}
+.show-card{
+    padding-left: 0;
+    padding-right: 0;
+}
