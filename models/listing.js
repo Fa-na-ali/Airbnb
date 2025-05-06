@@ -22,6 +22,12 @@ filename:String,
     price: Number,
     location: String,
     country: String,
+    reviews:[
+      {
+        type:Schema.Types.ObjectId,
+        ref:"Review",
+      },
+    ]
 })
 
 const Listing = mongoose.model("Listing", listingSchema)
