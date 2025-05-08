@@ -8,6 +8,7 @@ const ejsMate = require('ejs-mate')
 const wrapAsync = require('./utils/wrapAsync')
 const ExpressError = require('./utils/expressError')
 const { listingSchema } = require('./schema')
+const Review = require("./models/review")
 
 const MONGO_URL = "mongodb://localhost:27017/wanderlust"
 
@@ -109,6 +110,19 @@ app.delete("/listings/:id", wrapAsync(async (req, res) => {
   console.log(deletedListing);
   res.redirect("/listings");
 }));
+
+//Reviews
+//Post route
+app.post("/listings/:id/reviews",async(req,res)=>{
+let listing=await Listing.findById(req.params.id);
+let newReview = new Review(req.body.review)
+
+listing.reviews.push(newReview)
+await newReview.save()
+await listing.save()
+res.redirect(`/listings/${listing._id}`)
+})
+
 
 app.all(/./, (req, res, next) => {
   next(new ExpressError(404, "Page Not Found"));
