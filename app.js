@@ -7,7 +7,7 @@ const methodOverride = require("method-override");
 const ejsMate = require('ejs-mate')
 const wrapAsync = require('./utils/wrapAsync')
 const ExpressError = require('./utils/expressError')
-const { listingSchema } = require('./schema')
+const { listingSchema, reviewSchema } = require('./schema')
 const Review = require("./models/review")
 
 const MONGO_URL = "mongodb://localhost:27017/wanderlust"
@@ -37,15 +37,26 @@ app.get('/', (req, res) => {
   res.send("Hi, I am root")
 })
 
-const validateListing = (req,res,next)=>{
-  let {error} = listingSchema.validate(req.body)
-  if(error){
-    let errMsg  = error.details.map(el=>el.message).join(',')
-    throw new ExpressError(400,errMsg)
+const validateListing = (req, res, next) => {
+  let { error } = listingSchema.validate(req.body)
+  if (error) {
+    let errMsg = error.details.map(el => el.message).join(',')
+    throw new ExpressError(400, errMsg)
   }
   else
-  next();
-  
+    next();
+
+}
+
+const validateReview = (req, res, next) => {
+  let { error } = reviewSchema.validate(req.body)
+  if (error) {
+    let errMsg = error.details.map(el => el.message).join(',')
+    throw new ExpressError(400, errMsg)
+  }
+  else
+    next();
+
 }
 
 app.get('/testlisting', async (req, res) => {
@@ -81,8 +92,8 @@ app.get("/listings/:id", wrapAsync(async (req, res) => {
 }));
 
 //Create Route
-app.post("/listings", validateListing,wrapAsync(async (req, res, next) => {
-  
+app.post("/listings", validateListing, wrapAsync(async (req, res, next) => {
+
   const newListing = new Listing(req.body.listing);
   await newListing.save();
   res.redirect("/listings");
@@ -90,7 +101,7 @@ app.post("/listings", validateListing,wrapAsync(async (req, res, next) => {
 }));
 
 //Edit Route
-app.get("/listings/:id/edit",  wrapAsync(async (req, res) => {
+app.get("/listings/:id/edit", wrapAsync(async (req, res) => {
   let { id } = req.params;
   const listing = await Listing.findById(id);
   res.render("listings/edit.ejs", { listing });
@@ -113,15 +124,15 @@ app.delete("/listings/:id", wrapAsync(async (req, res) => {
 
 //Reviews
 //Post route
-app.post("/listings/:id/reviews",async(req,res)=>{
-let listing=await Listing.findById(req.params.id);
-let newReview = new Review(req.body.review)
+app.post("/listings/:id/reviews", validateReview, wrapAsync(async (req, res) => {
+  let listing = await Listing.findById(req.params.id);
+  let newReview = new Review(req.body.review)
 
-listing.reviews.push(newReview)
-await newReview.save()
-await listing.save()
-res.redirect(`/listings/${listing._id}`)
-})
+  listing.reviews.push(newReview)
+  await newReview.save()
+  await listing.save()
+  res.redirect(`/listings/${listing._id}`)
+}))
 
 
 app.all(/./, (req, res, next) => {
