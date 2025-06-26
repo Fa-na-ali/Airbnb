@@ -29,7 +29,11 @@ filename:String,
         type:Schema.Types.ObjectId,
         ref:"Review",
       },
-    ]
+    ],
+    owner:{
+      type:Schema.Types.ObjectId,
+        ref:"User",
+    }
 })
 
 listingSchema.post("fineOneAndDelete",async(listing)=>{
